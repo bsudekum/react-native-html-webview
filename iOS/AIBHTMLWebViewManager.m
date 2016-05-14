@@ -31,6 +31,7 @@ RCT_EXPORT_VIEW_PROPERTY(autoHeight, BOOL)
     return @[
              @"link",
              @"changeHeight",
+             @"doneLoading"
             ];
 }
 

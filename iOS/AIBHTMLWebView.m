@@ -67,7 +67,7 @@
     _webView.frame = frame;
     frame.size.height = [[_webView stringByEvaluatingJavaScriptFromString: @"document.documentElement.scrollHeight"] floatValue];
     NSNumber *height = [NSNumber numberWithFloat: frame.size.height];
-    
+
     NSMutableDictionary *event = [[NSMutableDictionary alloc] initWithDictionary: @{
                                                                                     @"target": self.reactTag,
                                                                                     @"contentHeight": height
@@ -83,9 +83,12 @@
         // When we load from HTML string it still shows up as a request, so let's let that through
         return YES;
     } else {
+        NSURL *url = request.URL;
         NSMutableDictionary *event = [[NSMutableDictionary alloc] initWithDictionary: @{
                                                                                         @"target": self.reactTag,
-                                                                                        @"url": [request.URL absoluteString]
+                                                                                        @"url": [request.URL absoluteString],
+                                                                                        @"path": request.URL.path,
+                                                                                        @"host": request.URL.host
                                                                                         }];
         [_eventDispatcher sendInputEventWithName:@"link" body:event];
         return NO; // Tells the webView not to load the URL
@@ -93,6 +96,9 @@
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+    [_eventDispatcher sendInputEventWithName:@"doneLoading" body: @{
+                                                                    @"target": self.reactTag
+                                                                    }];
     [self reportHeight];
 }
 

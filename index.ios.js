@@ -2,12 +2,12 @@
 // remove javascript and any other dangerous tags. Link clicks will
 // generate events but won't automatically change what is displayed.
 
-var React = require('react-native');
-var {
+import React, { Component, PropTypes } from 'react';
+import {
   View,
-  PropTypes,
+  ActivityIndicatorIOS,
   requireNativeComponent
-} = React;
+} from 'react-native';
 
 var safeHtml = require('safe-html');
 var _ = require('underscore');
@@ -41,7 +41,8 @@ var HTMLWebView = React.createClass({
 
   getInitialState: function() {
     return {
-      contentHeight: 1
+      contentHeight: 1,
+      loaded: false
     };
   },
 
@@ -55,17 +56,25 @@ var HTMLWebView = React.createClass({
       this._safeHtml = this.safeHtml(this._currentHtml);
     }
     return (
+      <View >
+        {!this.state.loaded &&
+          <ActivityIndicatorIOS
+            animating={true}
+            style={{padding:10}}
+            size='small' />}
         <_HTMLWebView
           style={[{height: this.state.contentHeight}, this.props.style]}
           html={this._safeHtml}
           autoHeight={this.props.autoHeight}
           onLink={this.onLink}
+          onDoneLoading={() => this.setState({loaded: true})}
           onChangeHeight={(e) => {
             this.contentHeight = e.nativeEvent.contentHeight;
             if (this.props.autoHeight && this.contentHeight > 1) {
               this.onChangeHeight();
             }
           }} />
+      </View>
     );
   },
 
@@ -82,13 +91,15 @@ var HTMLWebView = React.createClass({
 
   onLink: function (e) {
     if (_.isFunction(this.props.onLink)) {
-      this.props.onLink(e.nativeEvent.url);
+      this.props.onLink(e.nativeEvent);
     }
   },
 
   onChangeHeight: function () {
     if (this.contentHeight !== this.state.contentHeight) {
       this.setState({contentHeight: this.contentHeight});
+    } else if (this.contentHeight === this.state.contentHeight) {
+      // this.setState({loaded: true});
     }
   }
 });

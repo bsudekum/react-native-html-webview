@@ -12,6 +12,4 @@
 
 @interface AIBHTMLWebViewManager : RCTViewManager
 
-
-
 @end
